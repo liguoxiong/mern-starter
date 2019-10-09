@@ -1,16 +1,16 @@
-import React, {Component} from "react";
-import {connect} from "react-redux";
-import URLSearchParams from 'url-search-params'
-import {Redirect, Route, Switch} from "react-router-dom";
-import {LocaleProvider} from "antd";
-import {IntlProvider} from "react-intl";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import URLSearchParams from 'url-search-params';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { ConfigProvider } from 'antd';
+import { IntlProvider } from 'react-intl';
 
-import AppLocale from "lngProvider";
-import MainApp from "./MainApp";
-import SignIn from "../SignIn";
-import SignUp from "../SignUp";
-import {setInitUrl} from "appRedux/actions/Auth";
-import {onLayoutTypeChange, onNavStyleChange, setThemeType} from "appRedux/actions/Setting";
+import AppLocale from 'lngProvider';
+import MainApp from './MainApp';
+import SignIn from '../SignIn';
+import SignUp from '../SignUp';
+import { setInitUrl } from 'appRedux/actions/Auth';
+import { onLayoutTypeChange, onNavStyleChange, setThemeType } from 'appRedux/actions/Setting';
 
 import {
   LAYOUT_TYPE_BOXED,
@@ -20,27 +20,29 @@ import {
   NAV_STYLE_BELOW_HEADER,
   NAV_STYLE_DARK_HORIZONTAL,
   NAV_STYLE_DEFAULT_HORIZONTAL,
-  NAV_STYLE_INSIDE_HEADER_HORIZONTAL
-} from "../../constants/ThemeSetting";
+  NAV_STYLE_INSIDE_HEADER_HORIZONTAL,
+} from '../../constants/ThemeSetting';
 
-const RestrictedRoute = ({component: Component, authUser, ...rest}) =>
+const RestrictedRoute = ({ component: Component, authUser, ...rest }) => (
   <Route
     {...rest}
     render={props =>
-      authUser
-        ? <Component {...props} />
-        : <Redirect
+      authUser ? (
+        <Component {...props} />
+      ) : (
+        <Redirect
           to={{
             pathname: '/signin',
-            state: {from: props.location}
+            state: { from: props.location },
           }}
-        />}
-  />;
-
+        />
+      )
+    }
+  />
+);
 
 class App extends Component {
-
-  setLayoutType = (layoutType) => {
+  setLayoutType = layoutType => {
     if (layoutType === LAYOUT_TYPE_FULL) {
       document.body.classList.remove('boxed-layout');
       document.body.classList.remove('framed-layout');
@@ -56,12 +58,14 @@ class App extends Component {
     }
   };
 
-  setNavStyle = (navStyle) => {
-    if (navStyle === NAV_STYLE_DEFAULT_HORIZONTAL ||
+  setNavStyle = navStyle => {
+    if (
+      navStyle === NAV_STYLE_DEFAULT_HORIZONTAL ||
       navStyle === NAV_STYLE_DARK_HORIZONTAL ||
       navStyle === NAV_STYLE_INSIDE_HEADER_HORIZONTAL ||
       navStyle === NAV_STYLE_ABOVE_HEADER ||
-      navStyle === NAV_STYLE_BELOW_HEADER) {
+      navStyle === NAV_STYLE_BELOW_HEADER
+    ) {
       document.body.classList.add('full-scroll');
       document.body.classList.add('horizontal-layout');
     } else {
@@ -76,27 +80,27 @@ class App extends Component {
     }
     const params = new URLSearchParams(this.props.location.search);
 
-    if (params.has("theme")) {
+    if (params.has('theme')) {
       this.props.setThemeType(params.get('theme'));
     }
-    if (params.has("nav-style")) {
+    if (params.has('nav-style')) {
       this.props.onNavStyleChange(params.get('nav-style'));
     }
-    if (params.has("layout-type")) {
+    if (params.has('layout-type')) {
       this.props.onLayoutTypeChange(params.get('layout-type'));
     }
   }
 
   render() {
-    const {match, location, layoutType, navStyle, locale, authUser, initURL} = this.props;
+    const { match, location, layoutType, navStyle, locale, authUser, initURL } = this.props;
 
     if (location.pathname === '/') {
       if (authUser === null) {
-        return ( <Redirect to={'/signin'}/> );
+        return <Redirect to={'/signin'} />;
       } else if (initURL === '' || initURL === '/' || initURL === '/signin') {
-        return ( <Redirect to={'/main/dashboard/crypto'}/> );
+        return <Redirect to={'/main/dashboard/crypto'} />;
       } else {
-        return ( <Redirect to={initURL}/> );
+        return <Redirect to={initURL} />;
       }
     }
     this.setLayoutType(layoutType);
@@ -105,26 +109,25 @@ class App extends Component {
 
     const currentAppLocale = AppLocale[locale.locale];
     return (
-      <LocaleProvider locale={currentAppLocale.antd}>
-        <IntlProvider
-          locale={currentAppLocale.locale}
-          messages={currentAppLocale.messages}>
-
+      <ConfigProvider locale={currentAppLocale.antd}>
+        <IntlProvider locale={currentAppLocale.locale} messages={currentAppLocale.messages}>
           <Switch>
-            <Route exact path='/signin' component={SignIn}/>
-            <Route exact path='/signup' component={SignUp}/>
-            <RestrictedRoute path={`${match.url}`} authUser={authUser}
-                             component={MainApp}/>
+            <Route exact path="/signin" component={SignIn} />
+            <Route exact path="/signup" component={SignUp} />
+            <RestrictedRoute path={`${match.url}`} authUser={authUser} component={MainApp} />
           </Switch>
         </IntlProvider>
-      </LocaleProvider>
-    )
+      </ConfigProvider>
+    );
   }
 }
 
-const mapStateToProps = ({settings, auth}) => {
-  const {locale, navStyle, layoutType} = settings;
-  const {authUser, initURL} = auth;
-  return {locale, navStyle, layoutType, authUser, initURL}
+const mapStateToProps = ({ settings, auth }) => {
+  const { locale, navStyle, layoutType } = settings;
+  const { authUser, initURL } = auth;
+  return { locale, navStyle, layoutType, authUser, initURL };
 };
-export default connect(mapStateToProps, {setInitUrl, setThemeType, onNavStyleChange, onLayoutTypeChange})(App);
+export default connect(
+  mapStateToProps,
+  { setInitUrl, setThemeType, onNavStyleChange, onLayoutTypeChange },
+)(App);
