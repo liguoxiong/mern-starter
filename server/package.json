@@ -34,6 +34,7 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
     "eslint": "^6.3.0",
+    "eslint-config-airbnb-base": "^14.0.0",
     "eslint-loader": "^3.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^10.0.0",
@@ -55,5 +56,31 @@
     "webpack-dev-server": "^3.8.2",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-node-externals": "^1.7.2"
+  },
+  "eslintConfig": {
+    "extends": "airbnb-base",
+    "env": {
+      "es6": true,
+      "browser": true
+    },
+    "rules": {
+      "brace-style": [
+        "error",
+        "stroustrup"
+      ],
+      "comma-dangle": [
+        "error",
+        "never"
+      ],
+      "no-unused-vars": [
+        "warn"
+      ],
+      "no-var": [
+        "off"
+      ],
+      "one-var": [
+        "off"
+      ]
+    }
   }
 }
