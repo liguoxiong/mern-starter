@@ -9,7 +9,7 @@ import AppLocale from 'lngProvider';
 import MainApp from './MainApp';
 import SignIn from '../SignIn';
 import SignUp from '../SignUp';
-import { setInitUrl } from 'appRedux/actions/Auth';
+import { setInitUrl, getUser } from 'appRedux/actions/Auth';
 import { onLayoutTypeChange, onNavStyleChange, setThemeType } from 'appRedux/actions/Setting';
 
 import {
@@ -75,6 +75,7 @@ class App extends Component {
   };
 
   componentWillMount() {
+    this.props.getUser();
     if (this.props.initURL === '') {
       this.props.setInitUrl(this.props.history.location.pathname);
     }
@@ -129,5 +130,5 @@ const mapStateToProps = ({ settings, auth }) => {
 };
 export default connect(
   mapStateToProps,
-  { setInitUrl, setThemeType, onNavStyleChange, onLayoutTypeChange },
+  { setInitUrl, setThemeType, onNavStyleChange, onLayoutTypeChange, getUser },
 )(App);

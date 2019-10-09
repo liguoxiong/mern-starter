@@ -17,101 +17,115 @@ import {
   SIGNOUT_USER,
   SIGNOUT_USER_SUCCESS,
   SIGNUP_USER,
-  SIGNUP_USER_SUCCESS
-} from "constants/ActionTypes";
+  SIGNUP_USER_SUCCESS,
+  GET_USER,
+  GET_USER_SUCCESS,
+} from 'constants/ActionTypes';
 
-export const userSignUp = (user) => {
+export const getUser = () => {
   return {
-    type: SIGNUP_USER,
-    payload: user
+    type: GET_USER,
   };
 };
-export const userSignIn = (user) => {
+
+export const userSignUp = user => {
+  return {
+    type: SIGNUP_USER,
+    payload: user,
+  };
+};
+export const userSignIn = user => {
   return {
     type: SIGNIN_USER,
-    payload: user
+    payload: user,
   };
 };
 export const userSignOut = () => {
   return {
-    type: SIGNOUT_USER
+    type: SIGNOUT_USER,
   };
 };
-export const userSignUpSuccess = (authUser) => {
+export const getUserSuccess = authUser => {
   return {
-    type: SIGNUP_USER_SUCCESS,
-    payload: authUser
+    type: GET_USER_SUCCESS,
+    payload: authUser,
   };
 };
 
-export const userSignInSuccess = (authUser) => {
+export const userSignUpSuccess = authUser => {
+  return {
+    type: SIGNUP_USER_SUCCESS,
+    payload: authUser,
+  };
+};
+
+export const userSignInSuccess = authUser => {
   return {
     type: SIGNIN_USER_SUCCESS,
-    payload: authUser
-  }
+    payload: authUser,
+  };
 };
 export const userSignOutSuccess = () => {
   return {
     type: SIGNOUT_USER_SUCCESS,
-  }
-};
-
-export const showAuthMessage = (message) => {
-  return {
-    type: SHOW_MESSAGE,
-    payload: message
   };
 };
 
+export const showAuthMessage = message => {
+  return {
+    type: SHOW_MESSAGE,
+    payload: message,
+  };
+};
 
 export const userGoogleSignIn = () => {
   return {
-    type: SIGNIN_GOOGLE_USER
+    type: SIGNIN_GOOGLE_USER,
   };
 };
-export const userGoogleSignInSuccess = (authUser) => {
+export const userGoogleSignInSuccess = authUser => {
   return {
     type: SIGNIN_GOOGLE_USER_SUCCESS,
-    payload: authUser
+    payload: authUser,
   };
 };
 export const userFacebookSignIn = () => {
   return {
-    type: SIGNIN_FACEBOOK_USER
+    type: SIGNIN_FACEBOOK_USER,
   };
 };
-export const userFacebookSignInSuccess = (authUser) => {
+export const userFacebookSignInSuccess = authUser => {
   return {
     type: SIGNIN_FACEBOOK_USER_SUCCESS,
-    payload: authUser
+    payload: authUser,
   };
 };
-export const setInitUrl = (url) => {
+export const setInitUrl = url => {
   return {
     type: INIT_URL,
-    payload: url
+    payload: url,
   };
 };
 export const userTwitterSignIn = () => {
   return {
-    type: SIGNIN_TWITTER_USER
+    type: SIGNIN_TWITTER_USER,
   };
 };
-export const userTwitterSignInSuccess = (authUser) => {
+export const userTwitterSignInSuccess = authUser => {
   return {
     type: SIGNIN_TWITTER_USER_SUCCESS,
-    payload: authUser
+    payload: authUser,
   };
 };
 export const userGithubSignIn = () => {
   return {
-    type: SIGNIN_GITHUB_USER
+    type: SIGNIN_GITHUB_USER,
   };
 };
-export const userGithubSignInSuccess = (authUser) => {
+export const userGithubSignInSuccess = authUser => {
   return {
     type: SIGNIN_GITHUB_USER_SUCCESS,
-    payload: authUser
+    payload: authUser,
   };
 };
 export const showAuthLoader = () => {
