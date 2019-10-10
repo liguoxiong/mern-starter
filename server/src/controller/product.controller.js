@@ -39,20 +39,24 @@ const createProduct = async (req, res) => {
     const slug = slugger(name);
     let imageSubmit = [];
     image.forEach(async item => {
-      const imagePath = await saveImage(item.url);
-      // console.log("imagepath", imagePath);
-      if (!imagePath.success) {
-        return res.status(500).send({
-          success: false,
-          message: imagePath.message
+      if (!isBase64String(item.url)) {
+        imageSubmit.push(item);
+      } else {
+        const imagePath = await saveImage(item.url);
+        // console.log("imagepath", imagePath);
+        if (!imagePath.success) {
+          return res.status(500).send({
+            success: false,
+            message: imagePath.message
+          });
+        }
+        imageSubmit.push({
+          uid: item.uid,
+          name: item.name,
+          status: item.status,
+          url: imagePath.message
         });
       }
-      imageSubmit.push({
-        uid: item.uid,
-        name: item.name,
-        status: item.status,
-        url: imagePath.message
-      });
     });
 
     //find an existing category
@@ -63,10 +67,10 @@ const createProduct = async (req, res) => {
       );
       const { percent_discount, value_discount } = currentCampaign;
       if (percent_discount) {
-        sale_price = Math.floor((percent_discount * original_price) / 100);
+        sale_price -= Math.floor((percent_discount * original_price) / 100);
       }
       if (value_discount) {
-        sale_price = original_price - value_discount;
+        sale_price = sale_price - value_discount;
       }
     }
 
@@ -157,6 +161,8 @@ const getAllProduct = async (req, res) => {
         .limit(limitValue)
         .skip(skipValue)
         .populate("category")
+        .populate("promotion_campaign")
+        .populate("branch")
     ]);
 
     return res.status(200).send({
@@ -179,68 +185,79 @@ const updateProductById = async (req, res) => {
       name,
       original_price,
       promotion_campaign,
+      haveSold,
       ...rst
     } = req.body;
+    let originProduct = await Product.findById(req.params.id)
+      .populate("category")
+      .populate("promotion_campaign")
+      .populate("branch");
     const submitObj = req.body;
+    let sale_price = originProduct.original_price;
+    let promotionCampaign = originProduct.promotion_campaign;
     if (original_price) {
-      let sale_price = original_price;
-      if (promotion_campaign) {
-        const currentCampaign = await PromotionCampaign.findById(
-          promotion_campaign
-        );
-        const { percent_discount, value_discount } = currentCampaign;
-        if (percent_discount) {
-          sale_price = Math.floor((percent_discount * original_price) / 100);
-        }
-        if (value_discount) {
-          sale_price = original_price - value_discount;
-        }
-      }
-      submitObj.sale_price = sale_price;
+      sale_price = original_price;
     }
+    if (promotion_campaign) {
+      promotionCampaign = await PromotionCampaign.findById(promotion_campaign);
+    }
+    const { percent_discount, value_discount } = promotionCampaign;
+    if (percent_discount) {
+      sale_price -= Math.floor((percent_discount * original_price) / 100);
+    }
+    if (value_discount) {
+      sale_price = sale_price - value_discount;
+    }
+    submitObj.promotion_campaign = promotionCampaign._id.toString();
+    submitObj.sale_price = sale_price;
+
     if (name) {
       submitObj.slug = slugger(name);
     }
-    let imageSubmit = [];
-    for (const item of image) {
-      if (isBase64String(item.url)) {
-        const imagePath = await saveImage(item.url);
-        if (!imagePath.success) {
-          return res.status(500).send({
-            success: false,
-            message: imagePath.message
+    if (image) {
+      let imageSubmit = [];
+      for (const item of image) {
+        if (isBase64String(item.url)) {
+          const imagePath = await saveImage(item.url);
+          if (!imagePath.success) {
+            return res.status(500).send({
+              success: false,
+              message: imagePath.message
+            });
+          }
+          imageSubmit.push({
+            uid: item.uid,
+            name: item.name,
+            status: item.status,
+            url: imagePath.message
+          });
+        } else if (item.thumbUrl) {
+          const imagePath = await saveImage(item.thumbUrl);
+          if (!imagePath.success) {
+            return res.status(500).send({
+              success: false,
+              message: imagePath.message
+            });
+          }
+          imageSubmit.push({
+            uid: item.uid,
+            name: item.name,
+            status: item.status,
+            url: imagePath.message
+          });
+        } else {
+          imageSubmit.push({
+            uid: item.uid,
+            name: item.name,
+            status: item.status,
+            url: item.url
           });
         }
-        imageSubmit.push({
-          uid: item.uid,
-          name: item.name,
-          status: item.status,
-          url: imagePath.message
-        });
-      } else if (item.thumbUrl) {
-        const imagePath = await saveImage(item.thumbUrl);
-        if (!imagePath.success) {
-          return res.status(500).send({
-            success: false,
-            message: imagePath.message
-          });
-        }
-        imageSubmit.push({
-          uid: item.uid,
-          name: item.name,
-          status: item.status,
-          url: imagePath.message
-        });
-      } else {
-        imageSubmit.push({
-          uid: item.uid,
-          name: item.name,
-          status: item.status,
-          url: item.url
-        });
       }
+
+      submitObj.image = imageSubmit;
     }
-    submitObj.image = imageSubmit;
+    submitObj.updated_at = new Date();
     let product = await Product.findByIdAndUpdate(req.params.id, {
       $set: submitObj
     });
