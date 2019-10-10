@@ -1,8 +1,8 @@
-import Product, { validateProduct } from '../models/product.model';
-import PromotionCampaign from '../models/promotionCampaign.model';
-import mongoose from 'mongoose';
-import { slugger } from './../middleware/utils';
-import saveImage, { isBase64String } from './../middleware/saveImage';
+import Product, { validateProduct } from "../models/product.model";
+import PromotionCampaign from "../models/promotionCampaign.model";
+import mongoose from "mongoose";
+import { slugger } from "./../middleware/utils";
+import saveImage, { isBase64String } from "./../middleware/saveImage";
 
 const createProduct = async (req, res) => {
   try {
@@ -11,7 +11,7 @@ const createProduct = async (req, res) => {
     if (error)
       return res.status(400).send({
         success: false,
-        message: error.details[0].message,
+        message: error.details[0].message
       });
     const {
       name,
@@ -27,13 +27,13 @@ const createProduct = async (req, res) => {
       stock,
       haveSold,
       category,
-      image,
+      image
     } = req.body;
     let product = await Product.findOne({ name });
     if (product)
       return res.status(400).send({
         success: false,
-        message: 'Product already existed.',
+        message: "Product already existed."
       });
 
     const slug = slugger(name);
@@ -44,21 +44,23 @@ const createProduct = async (req, res) => {
       if (!imagePath.success) {
         return res.status(500).send({
           success: false,
-          message: imagePath.message,
+          message: imagePath.message
         });
       }
       imageSubmit.push({
         uid: item.uid,
         name: item.name,
         status: item.status,
-        url: imagePath.message,
+        url: imagePath.message
       });
     });
 
     //find an existing category
     let sale_price = original_price;
     if (promotion_campaign) {
-      const currentCampaign = await PromotionCampaign.findById(promotion_campaign);
+      const currentCampaign = await PromotionCampaign.findById(
+        promotion_campaign
+      );
       const { percent_discount, value_discount } = currentCampaign;
       if (percent_discount) {
         sale_price = Math.floor((percent_discount * original_price) / 100);
@@ -84,37 +86,40 @@ const createProduct = async (req, res) => {
       stock,
       category,
       image: imageSubmit,
-      category: mongoose.Types.ObjectId(category),
+      category: mongoose.Types.ObjectId(category)
     });
     await product.save();
     res.status(200).send({
       success: true,
-      message: 'Add new product successfull',
+      message: "Add new product successfull"
     });
   } catch (err) {
     return res.status(500).send({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 };
 
 const getProductById = async (req, res) => {
   try {
-    let product = await Product.findById(req.params.id).populate('category');
+    let product = await Product.findById(req.params.id)
+      .populate("category")
+      .populate("promotion_campaign")
+      .populate("branch");
     if (!product)
       return res.status(400).send({
         success: false,
-        message: 'Product is not existed.',
+        message: "Product is not existed."
       });
     res.status(200).send({
       success: true,
-      data: product,
+      product
     });
   } catch (err) {
     return res.status(500).send({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 };
@@ -126,7 +131,7 @@ const getAllProduct = async (req, res) => {
 
     const query = {};
     if (req.query.isShow) {
-      const isShow = req.query.isShow === 'true';
+      const isShow = req.query.isShow === "true";
       query.isShow = isShow;
     }
     if (req.query.pageSize) {
@@ -141,37 +146,61 @@ const getAllProduct = async (req, res) => {
       const category = mongoose.Types.ObjectId(req.query.category);
       query.category = category;
     }
-    let [count, product] = await Promise.all([
+    if (req.query.branch) {
+      const branch = mongoose.Types.ObjectId(req.query.branch);
+      query.branch = branch;
+    }
+    let [count, products] = await Promise.all([
       Product.countDocuments(query),
       Product.find(query)
-        .sort('-created_at')
+        .sort("-created_at")
         .limit(limitValue)
         .skip(skipValue)
-        .populate('category'),
+        .populate("category")
     ]);
-    // const count = await Product.count(query);
-    // let product = await Product.find(query)
-    //   .sort("-created_at")
-    //   .limit(limitValue)
-    //   .skip(skipValue)
-    //   .populate("category");
 
     return res.status(200).send({
       success: true,
-      data: product,
-      total: count,
+      products,
+      total: count
     });
   } catch (err) {
     return res.status(500).send({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 };
 
 const updateProductById = async (req, res) => {
   try {
-    const { image, ...rst } = req.body;
+    const {
+      image,
+      name,
+      original_price,
+      promotion_campaign,
+      ...rst
+    } = req.body;
+    const submitObj = req.body;
+    if (original_price) {
+      let sale_price = original_price;
+      if (promotion_campaign) {
+        const currentCampaign = await PromotionCampaign.findById(
+          promotion_campaign
+        );
+        const { percent_discount, value_discount } = currentCampaign;
+        if (percent_discount) {
+          sale_price = Math.floor((percent_discount * original_price) / 100);
+        }
+        if (value_discount) {
+          sale_price = original_price - value_discount;
+        }
+      }
+      submitObj.sale_price = sale_price;
+    }
+    if (name) {
+      submitObj.slug = slugger(name);
+    }
     let imageSubmit = [];
     for (const item of image) {
       if (isBase64String(item.url)) {
@@ -179,54 +208,55 @@ const updateProductById = async (req, res) => {
         if (!imagePath.success) {
           return res.status(500).send({
             success: false,
-            message: imagePath.message,
+            message: imagePath.message
           });
         }
         imageSubmit.push({
           uid: item.uid,
           name: item.name,
           status: item.status,
-          url: imagePath.message,
+          url: imagePath.message
         });
       } else if (item.thumbUrl) {
         const imagePath = await saveImage(item.thumbUrl);
         if (!imagePath.success) {
           return res.status(500).send({
             success: false,
-            message: imagePath.message,
+            message: imagePath.message
           });
         }
         imageSubmit.push({
           uid: item.uid,
           name: item.name,
           status: item.status,
-          url: imagePath.message,
+          url: imagePath.message
         });
       } else {
         imageSubmit.push({
           uid: item.uid,
           name: item.name,
           status: item.status,
-          url: item.url,
+          url: item.url
         });
       }
     }
+    submitObj.image = imageSubmit;
     let product = await Product.findByIdAndUpdate(req.params.id, {
-      $set: { ...rst, image: imageSubmit },
+      $set: submitObj
     });
     if (!product)
       return res.status(400).send({
         success: false,
-        message: 'Product is not existed.',
+        message: "Product is not existed."
       });
     res.status(200).send({
       success: true,
-      message: 'Update product successfull',
+      message: "Update product successfull"
     });
   } catch (err) {
     return res.status(500).send({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 };
@@ -237,16 +267,16 @@ const deleteProductById = async (req, res) => {
     if (!product)
       return res.status(400).send({
         success: false,
-        message: 'Product is not existed.',
+        message: "Product is not existed."
       });
     res.status(200).send({
       success: true,
-      message: 'Delete product successfull',
+      message: "Delete product successfull"
     });
   } catch (err) {
     return res.status(500).send({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 };
@@ -256,5 +286,5 @@ export default {
   getProductById,
   updateProductById,
   deleteProductById,
-  getAllProduct,
+  getAllProduct
 };
