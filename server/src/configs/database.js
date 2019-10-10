@@ -7,7 +7,12 @@ const DB_URI =
   'mongodb+srv://root:mSKvXKsgl5Xd0zV0@dev-malml.gcp.mongodb.net/dev?retryWrites=true&w=majority';
 
 // #3 Connect to MongoDB
-mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
+mongoose.connect(DB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+});
 
 // #4 Add basic event listeners on the mongoose.connection object
 mongoose.connection.once('open', () => console.log('Connected to a MongoDB instance'));

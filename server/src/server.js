@@ -16,16 +16,7 @@ app.use(express.json({ limit: '50mb' }));
 app.get('/admin/*', (req, res) => {
   res.sendFile(ADMIN_HTML_FILE);
 });
-app.use('/api/user', routes.user);
-app.use('/api/categories', routes.category);
-app.use('/api/constructions', routes.construction);
-app.use('/api/products', routes.product);
-app.use('/api/photos', routes.image);
-app.use('/api/routes', routes.sidebarList);
-app.use('/api/info', routes.info);
-app.use('/api/banners', routes.banner);
-app.use('/api/services', routes.service);
-app.use('/api/sendmail', routes.mail);
+app.use('/api/v1', routes);
 app.get('/', (req, res) => {
   res.sendFile(HOME_HTML_FILE);
 });

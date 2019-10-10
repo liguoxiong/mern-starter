@@ -1,13 +1,12 @@
 import saveImage, { isBase64String } from './../middleware/saveImage';
-import Category, { validateCategory } from '../models/category.model';
+import Branch, { validateBranch } from '../models/branch.model';
 import { slugger } from './../middleware/utils';
 
-const createCategory = async (req, res) => {
+const createBranch = async (req, res) => {
   try {
     // validate the request body first
     const { name, description, image } = req.body;
-    const slug = slugger(name);
-    const { error } = validateCategory(req.body);
+    const { error } = validateBranch(req.body);
     if (error)
       return res.status(400).send({
         success: false,
@@ -15,7 +14,7 @@ const createCategory = async (req, res) => {
       });
     let imagePath = { message: image };
     if (isBase64String(image)) {
-      imagePath = await saveImage(image, 'upload/category');
+      imagePath = await saveImage(image, 'upload/branch');
       if (!imagePath.success) {
         return res.status(500).send({
           success: false,
@@ -23,25 +22,25 @@ const createCategory = async (req, res) => {
         });
       }
     }
-    //find an existing category
-    let category = await Category.findOne({ name });
-    if (category)
+    //find an existing branch
+    let branch = await Branch.findOne({ name });
+    if (branch)
       return res.status(400).send({
         success: false,
-        message: 'Category already existed.',
+        message: 'Branch already existed.',
       });
 
-    category = new Category({
+    branch = new Branch({
       name,
-      slug,
+      slug: slugger(name),
       description,
       image: imagePath.message,
     });
-    await category.save();
+    await branch.save();
     res.status(200).send({
       success: true,
-      message: 'Add new category successfull',
-      category,
+      message: 'Add new branch successfull',
+      branch,
     });
   } catch (err) {
     return res.status(500).send({
@@ -51,17 +50,17 @@ const createCategory = async (req, res) => {
   }
 };
 
-const getAllCategory = async (req, res) => {
+const getAllBranch = async (req, res) => {
   try {
     const limitValue = parseInt(req.query.limit) || 10;
     const skipValue = parseInt(req.query.skip) || 0;
-    let category = await Category.find()
+    let branch = await Branch.find()
       .sort('-created_at')
       .limit(limitValue)
       .skip(skipValue);
     res.status(200).send({
       success: true,
-      category,
+      branch,
     });
   } catch (err) {
     return res.status(500).send({
@@ -71,17 +70,17 @@ const getAllCategory = async (req, res) => {
   }
 };
 
-const getCategoryById = async (req, res) => {
+const getBranchById = async (req, res) => {
   try {
-    let category = await Category.findById(req.params.id);
-    if (!category)
+    let branch = await Branch.findById(req.params.id);
+    if (!branch)
       return res.status(400).send({
         success: false,
-        message: 'Category is not existed.',
+        message: 'Branch is not existed.',
       });
     res.status(200).send({
       success: true,
-      category,
+      branch,
     });
   } catch (err) {
     return res.status(500).send({
@@ -91,20 +90,20 @@ const getCategoryById = async (req, res) => {
   }
 };
 
-const updateCategoryById = async (req, res) => {
+const updateBranchById = async (req, res) => {
   try {
     if (req.body.name) {
-      const category = await Category.findOne({ name: req.body.name });
-      console.log(category);
-      if (category && category._id.toString() !== req.params.id)
+      const branch = await Branch.findOne({ name: req.body.name });
+      if (branch)
         return res.status(400).send({
           success: false,
-          message: 'Category already existed.',
+          message: 'Branch already existed.',
         });
     }
     const updateObj = req.body;
     if (isBase64String(req.body.image)) {
-      const imagePath = await saveImage(req.body.image, 'upload/category');
+      const imagePath = await saveImage(req.body.image, 'upload/branch');
+      // console.log("imagepath", imagePath);
       if (!imagePath.success) {
         return res.status(500).send({
           success: false,
@@ -116,18 +115,19 @@ const updateCategoryById = async (req, res) => {
     if (updateObj.name) {
       updateObj.slug = slugger(updateObj.name);
     }
-    let category = await Category.findByIdAndUpdate(req.params.id, {
+
+    let branch = await Branch.findByIdAndUpdate(req.params.id, {
       $set: updateObj,
     });
-    if (!category)
+    if (!branch)
       return res.status(400).send({
         success: false,
-        message: 'Category is not existed.',
+        message: 'Branch is not existed.',
       });
     res.status(200).send({
       success: true,
-      message: 'Update category successfull',
-      category,
+      message: 'Update branch successfull',
+      branch,
     });
   } catch (err) {
     return res.status(500).send({
@@ -137,17 +137,17 @@ const updateCategoryById = async (req, res) => {
   }
 };
 
-const deleteCategoryById = async (req, res) => {
+const deleteBranchById = async (req, res) => {
   try {
-    let category = await Category.findByIdAndRemove(req.params.id);
-    if (!category)
+    let branch = await Branch.findByIdAndRemove(req.params.id);
+    if (!branch)
       return res.status(400).send({
         success: false,
-        message: 'Category is not existed.',
+        message: 'Branch is not existed.',
       });
     res.status(200).send({
       success: true,
-      message: 'Delete category successfull',
+      message: 'Delete branch successfull',
     });
   } catch (err) {
     return res.status(500).send({
@@ -157,9 +157,9 @@ const deleteCategoryById = async (req, res) => {
   }
 };
 export default {
-  createCategory,
-  getCategoryById,
-  updateCategoryById,
-  deleteCategoryById,
-  getAllCategory,
+  createBranch,
+  getBranchById,
+  updateBranchById,
+  deleteBranchById,
+  getAllBranch,
 };

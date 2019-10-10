@@ -3,7 +3,7 @@ import dotEnv from 'dotenv';
 import Joi from 'joi';
 dotEnv.config();
 //simple schema
-const CategorySchema = new mongoose.Schema({
+const BranchSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -15,7 +15,6 @@ const CategorySchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true,
   },
   description: {
     type: String,
@@ -26,10 +25,10 @@ const CategorySchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
 });
 
-const Category = mongoose.model('Category', CategorySchema);
+const Branch = mongoose.model('Branch', BranchSchema);
 
-//function to validate Category
-export const validateCategory = category => {
+//function to validate Branch
+export const validateBranch = branch => {
   const schema = {
     name: Joi.string()
       .min(3)
@@ -41,7 +40,7 @@ export const validateCategory = category => {
     image: Joi.string(),
   };
 
-  return Joi.validate(category, schema);
+  return Joi.validate(branch, schema);
 };
 
-export default Category;
+export default Branch;

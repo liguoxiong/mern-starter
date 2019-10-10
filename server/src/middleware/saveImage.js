@@ -25,7 +25,7 @@ const decodeBase64Image = dataString => {
   return response;
 };
 
-const saveImage = async (imageData, path) => {
+const saveImage = async (imageData, pathToSave) => {
   try {
     // console.log("saving init");
     const imageBuffer = decodeBase64Image(imageData);
@@ -39,7 +39,7 @@ const saveImage = async (imageData, path) => {
     const imageTypeRegularExpression = /\/(.*?)$/;
     const imageTypeDetected = imageBuffer.type.match(imageTypeRegularExpression);
     const uniqueRandomImageName = 'image-' + uniqueSHA1String + '.' + imageTypeDetected[1];
-    const imagePath = uploadPath + `/${path}/` + uniqueRandomImageName;
+    const imagePath = uploadPath + `/${pathToSave}/` + uniqueRandomImageName;
     try {
       fs.writeFile(imagePath, imageBuffer.data, function(err) {
         return {
@@ -49,7 +49,7 @@ const saveImage = async (imageData, path) => {
       });
       return {
         success: true,
-        message: `/public/${path}/${uniqueRandomImageName}`,
+        message: `/public/${pathToSave}/${uniqueRandomImageName}`,
       };
     } catch (error) {
       console.log('writeFile err');
