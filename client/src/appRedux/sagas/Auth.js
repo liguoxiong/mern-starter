@@ -22,6 +22,7 @@ import {
   userSignInSuccess,
   userSignOutSuccess,
   userSignUpSuccess,
+  getUserSuccess,
 } from '../../appRedux/actions/Auth';
 import {
   userFacebookSignInSuccess,
@@ -32,18 +33,18 @@ import {
 
 const getUser = async () =>
   await api.user
-    .logout()
+    .current()
     .then(user => user)
     .catch(error => error);
 
-function* getUserFromToken({ payload }) {
+function* getUserFromToken() {
   try {
     const res = yield call(getUser);
     if (res.message) {
       yield put(showAuthMessage(res.message));
     } else {
       localStorage.setItem('user_id', res.user._id);
-      yield put(userSignInSuccess(res.user));
+      yield put(getUserSuccess(res.user));
     }
   } catch (error) {
     yield put(showAuthMessage(error));

@@ -5,6 +5,7 @@ import { userSignOut } from 'appRedux/actions/Auth';
 
 class UserProfile extends Component {
   render() {
+    const { user } = this.props;
     const userMenuOptions = (
       <ul className="gx-user-popover">
         <li>My Account</li>
@@ -16,13 +17,9 @@ class UserProfile extends Component {
     return (
       <div className="gx-flex-row gx-align-items-center gx-mb-4 gx-avatar-row">
         <Popover placement="bottomRight" content={userMenuOptions} trigger="click">
-          <Avatar
-            src="https://via.placeholder.com/150x150"
-            className="gx-size-40 gx-pointer gx-mr-3"
-            alt=""
-          />
+          <Avatar src={user.avatar} className="gx-size-40 gx-pointer gx-mr-3" alt={user.userName} />
           <span className="gx-avatar-name">
-            Rob Farnandies
+            {user.fullName}
             <i className="icon icon-chevron-down gx-fs-xxs gx-ml-2" />
           </span>
         </Popover>
@@ -35,6 +32,6 @@ const mapStateToProps = state => ({
   user: state.auth.authUser,
 });
 export default connect(
-  null,
+  mapStateToProps,
   { userSignOut },
 )(UserProfile);
