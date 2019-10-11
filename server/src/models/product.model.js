@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import dotEnv from "dotenv";
-import Joi from "joi";
+import mongoose from 'mongoose';
+import dotEnv from 'dotenv';
+import Joi from 'joi';
 dotEnv.config();
 //simple schema
 const ProductSchema = new mongoose.Schema({
@@ -9,70 +9,72 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     minlength: 3,
     maxlength: 50,
-    unique: true
+    unique: true,
   },
   slug: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   overview: {
-    type: String
+    type: String,
   },
   original_price: {
     type: Number,
-    min: 0
+    min: 0,
   },
   sale_price: {
     type: Number,
-    min: 0
+    min: 0,
   },
   promotion_campaign: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "PromotionCampaign"
+    ref: 'PromotionCampaign',
   },
   branch: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch"
+    ref: 'Branch',
   },
   origin: {
-    type: String
+    type: String,
   },
   model: {
-    type: String
+    type: String,
+    unique: true,
+    required: true,
   },
   dilivery_time: {
-    type: String
+    type: String,
   },
   warranty_time: {
-    type: String
+    type: String,
   },
   isShow: {
     type: Boolean,
-    default: false
+    default: false,
   },
   stock: {
     type: Number,
-    default: 10
+    default: 10,
   },
   haveSold: {
     type: Number,
-    default: 0
+    default: 0,
   },
   image: {
     type: Array,
     required: true,
-    default: []
+    default: [],
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Category"
+    ref: 'Category',
   },
   created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date }
+  updated_at: { type: Date },
 });
 
-const Product = mongoose.model("Product", ProductSchema);
+const Product = mongoose.model('Product', ProductSchema);
 
 //function to validate Product
 export const validateProduct = product => {
@@ -87,12 +89,12 @@ export const validateProduct = product => {
     branch: Joi.string(),
     origin: Joi.string(),
     isShow: Joi.boolean(),
-    model: Joi.string(),
+    model: Joi.string().required(),
     dilivery_time: Joi.string(),
     warranty_time: Joi.string(),
     stock: Joi.number(),
     image: Joi.array(),
-    category: Joi.string()
+    category: Joi.string(),
   };
 
   return Joi.validate(product, schema);

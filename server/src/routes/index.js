@@ -31,6 +31,7 @@ router.delete('/promotion-campaigns/:id', promotionCampaignController.deleteProm
 
 router.get('/products', productController.getAllProduct);
 router.post('/products', auth, productController.createProduct);
+router.post('/products/warehousing', productController.warehousing);
 router.get('/products/:id', productController.getProductById);
 router.put('/products/:id', productController.updateProductById);
 router.delete('/products/:id', productController.deleteProductById);

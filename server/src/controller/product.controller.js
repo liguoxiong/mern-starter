@@ -285,10 +285,38 @@ const deleteProductById = async (req, res) => {
   }
 };
 
+const warehousing = async (req, res) => {
+  const { payload } = req.body;
+  // payload: [{model: string, inStock: number}]
+  try {
+    let products = [];
+    await Promise.all(
+      payload.map(async item => {
+        const product = await Product.findOne({ model: item.model });
+        product.stock += item.inStock;
+        products.push(product);
+        await product.save();
+      }),
+    );
+    res.status(200).send({
+      success: true,
+      message: 'Add Stock successfull',
+      products,
+      total: products.length,
+    });
+  } catch (err) {
+    return res.status(500).send({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 export default {
   createProduct,
   getProductById,
   updateProductById,
   deleteProductById,
   getAllProduct,
+  warehousing,
 };
