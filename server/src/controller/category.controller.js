@@ -95,11 +95,10 @@ const updateCategoryById = async (req, res) => {
   try {
     if (req.body.name) {
       const category = await Category.findOne({ name: req.body.name });
-      console.log(category);
       if (category && category._id.toString() !== req.params.id)
         return res.status(400).send({
           success: false,
-          message: 'Category already existed.',
+          message: 'Category name already existed.',
         });
     }
     const updateObj = req.body;

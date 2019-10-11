@@ -92,18 +92,18 @@ const getBranchById = async (req, res) => {
 
 const updateBranchById = async (req, res) => {
   try {
-    if (req.body.name) {
+    const updateObj = req.body;
+    if (updateObj.name) {
       const branch = await Branch.findOne({ name: req.body.name });
       if (branch)
         return res.status(400).send({
           success: false,
           message: 'Branch already existed.',
         });
+      updateObj.slug = slugger(updateObj.name);
     }
-    const updateObj = req.body;
-    if (isBase64String(req.body.image)) {
-      const imagePath = await saveImage(req.body.image, 'upload/branch');
-      // console.log("imagepath", imagePath);
+    if (updateObj.image && isBase64String(updateObj.image)) {
+      const imagePath = await saveImage(updateObj.image, 'upload/branch');
       if (!imagePath.success) {
         return res.status(500).send({
           success: false,
@@ -111,9 +111,6 @@ const updateBranchById = async (req, res) => {
         });
       }
       updateObj.image = imagePath.message;
-    }
-    if (updateObj.name) {
-      updateObj.slug = slugger(updateObj.name);
     }
 
     let branch = await Branch.findByIdAndUpdate(req.params.id, {
