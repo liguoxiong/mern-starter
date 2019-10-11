@@ -6,6 +6,7 @@ import {
   promotionCampaignController,
   productController,
   userController,
+  orderController,
 } from './../controller';
 
 const router = Router();
@@ -38,5 +39,10 @@ router.get('/user/', auth, userController.getCurrentUser);
 router.post('/user/register', userController.userRegister);
 router.post('/user/login', userController.userLogin);
 router.get('/user/logout', userController.userLogout);
+
+router.get('/orders/:id', orderController.getOrderById);
+router.get('/orders', orderController.getAllOrder);
+router.post('/orders', orderController.createOrder);
+router.post('/orders/update-status', orderController.changeOrderStatus);
 
 export default router;

@@ -121,6 +121,7 @@ const updateBranchById = async (req, res) => {
         success: false,
         message: 'Branch is not existed.',
       });
+    branch = await Branch.findById(req.params.id);
     res.status(200).send({
       success: true,
       message: 'Update branch successfull',

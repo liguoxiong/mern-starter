@@ -111,6 +111,7 @@ const updatePromotionCampaignById = async (req, res) => {
         success: false,
         message: 'PromotionCampaign is not existed.',
       });
+    promotionCampaign = await PromotionCampaign.findById(req.params.id);
     res.status(200).send({
       success: true,
       message: 'Update promotionCampaign successfull',

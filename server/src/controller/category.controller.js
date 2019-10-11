@@ -123,6 +123,7 @@ const updateCategoryById = async (req, res) => {
         success: false,
         message: 'Category is not existed.',
       });
+    category = await Category.findById(req.params.id);
     res.status(200).send({
       success: true,
       message: 'Update category successfull',

@@ -90,7 +90,8 @@ const createProduct = async (req, res) => {
       image: imageSubmit,
       category: mongoose.Types.ObjectId(category),
     });
-    const saveProduct = await product.save();
+    await product.save();
+    const saveProduct = await Product.findById(product._id);
     res.status(200).send({
       success: true,
       message: 'Add new product successfull',
@@ -250,9 +251,11 @@ const updateProductById = async (req, res) => {
         success: false,
         message: 'Product is not existed.',
       });
+    product = await Product.findById(req.params.id);
     res.status(200).send({
       success: true,
       message: 'Update product successfull',
+      product,
     });
   } catch (err) {
     return res.status(500).send({
