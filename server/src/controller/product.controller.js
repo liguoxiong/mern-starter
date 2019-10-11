@@ -1,5 +1,5 @@
 import Product, { validateProduct } from '../models/product.model';
-import PromotionCampaign from '../models/promotionCampaign.model';
+import { PromotionCampaign, Branch, Category } from '../models';
 import mongoose from 'mongoose';
 import { slugger } from './../middleware/utils';
 import saveImage, { isBase64String } from './../middleware/saveImage';
@@ -59,8 +59,166 @@ const createProduct = async (req, res) => {
       }
     });
 
-    //find an existing category
     let sale_price = original_price;
+    if (promotion_campaign) {
+      const currentCampaign = await PromotionCampaign.findById(promotion_campaign);
+      const { percent_discount, value_discount } = currentCampaign;
+      if (percent_discount) {
+        sale_price -= Math.floor((percent_discount * original_price) / 100);
+      }
+      if (value_discount) {
+        sale_price = sale_price - value_discount;
+      }
+    }
+
+    product = new Product({
+      name,
+      slug,
+      overview,
+      original_price,
+      sale_price,
+      promotion_campaign: mongoose.Types.ObjectId(promotion_campaign),
+      branch: mongoose.Types.ObjectId(branch),
+      origin,
+      model,
+      dilivery_time,
+      warranty_time,
+      isShow,
+      stock,
+      category,
+      image: imageSubmit,
+      category: mongoose.Types.ObjectId(category),
+    });
+    await product.save();
+    const saveProduct = await Product.findById(product._id);
+    res.status(200).send({
+      success: true,
+      message: 'Add new product successfull',
+      product: saveProduct,
+    });
+  } catch (err) {
+    return res.status(500).send({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+const createProductWithChild = async (req, res) => {
+  try {
+    // validate the request body first
+    // const { error } = validateProduct(req.body);
+    // if (error)
+    //   return res.status(400).send({
+    //     success: false,
+    //     message: error.details[0].message,
+    //   });
+    let {
+      name,
+      overview,
+      original_price,
+      promotion_campaign,
+      branch,
+      origin,
+      model,
+      dilivery_time,
+      warranty_time,
+      isShow,
+      stock,
+      haveSold,
+      category,
+      image,
+    } = req.body;
+    let product = await Product.findOne({ name });
+    if (product)
+      return res.status(400).send({
+        success: false,
+        message: 'Product already existed.',
+      });
+
+    const slug = slugger(name);
+    let imageSubmit = [];
+    if (image) {
+      image.forEach(async item => {
+        if (!isBase64String(item.url)) {
+          imageSubmit.push(item);
+        } else {
+          const imagePath = await saveImage(item.url);
+          // console.log("imagepath", imagePath);
+          if (!imagePath.success) {
+            return res.status(500).send({
+              success: false,
+              message: imagePath.message,
+            });
+          }
+          imageSubmit.push({
+            uid: item.uid,
+            name: item.name,
+            status: item.status,
+            url: imagePath.message,
+          });
+        }
+      });
+    }
+
+    let sale_price = original_price;
+    if (typeof category === 'object' && category !== null) {
+      try {
+        let createCategory = await Category.findOne({ name: category.name });
+        if (createCategory) {
+          category = createCategory._id.toString();
+        } else {
+          const slug = slugger(category.name);
+          createCategory = new Category({ slug, ...category });
+          await createCategory.save();
+          category = createCategory._id.toString();
+        }
+      } catch (err) {
+        return res.status(500).send({
+          success: false,
+          message: err.message,
+        });
+      }
+    }
+    if (typeof branch === 'object' && branch !== null) {
+      try {
+        let createBranch = await Branch.findOne({ name: branch.name });
+        if (createBranch) {
+          branch = createBranch._id.toString();
+        } else {
+          const slug = slugger(branch.name);
+          createBranch = new Branch({ slug, ...branch });
+          await createBranch.save();
+          branch = createBranch._id.toString();
+        }
+      } catch (err) {
+        return res.status(500).send({
+          success: false,
+          message: err.message,
+        });
+      }
+    }
+
+    if (typeof promotion_campaign === 'object' && promotion_campaign !== null) {
+      try {
+        let createPromotionCampaign = await PromotionCampaign.findOne({
+          name: promotion_campaign.name,
+        });
+        if (createPromotionCampaign) {
+          promotion_campaign = createPromotionCampaign._id.toString();
+        } else {
+          createPromotionCampaign = new PromotionCampaign(promotion_campaign);
+          await createPromotionCampaign.save();
+          promotion_campaign = createPromotionCampaign._id.toString();
+        }
+      } catch (err) {
+        return res.status(500).send({
+          success: false,
+          message: err.message,
+        });
+      }
+    }
+
     if (promotion_campaign) {
       const currentCampaign = await PromotionCampaign.findById(promotion_campaign);
       const { percent_discount, value_discount } = currentCampaign;
@@ -314,6 +472,7 @@ const warehousing = async (req, res) => {
 
 export default {
   createProduct,
+  createProductWithChild,
   getProductById,
   updateProductById,
   deleteProductById,

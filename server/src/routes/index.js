@@ -30,6 +30,7 @@ router.put('/promotion-campaigns/:id', promotionCampaignController.updatePromoti
 router.delete('/promotion-campaigns/:id', promotionCampaignController.deletePromotionCampaignById);
 
 router.get('/products', productController.getAllProduct);
+router.post('/products/power-create', auth, productController.createProductWithChild);
 router.post('/products', auth, productController.createProduct);
 router.post('/products/warehousing', productController.warehousing);
 router.get('/products/:id', productController.getProductById);
