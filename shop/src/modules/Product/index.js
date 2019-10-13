@@ -3,6 +3,8 @@ import ProductItem from "./../../components/ProductItem";
 import { useDispatch, useSelector } from "react-redux";
 import { GET_PRODUCT } from "./../../constants/actionTypes";
 
+import ShoppingBar from "./../../components/ShoppingBar";
+
 const Product = () => {
   const dispatch = useDispatch();
   const products = useSelector(state => state.products);
@@ -15,6 +17,7 @@ const Product = () => {
   }, []);
   return (
     <Fragment>
+      <ShoppingBar />
       {!isLoading &&
         (isError ? (
           <div>Something went wrong...</div>
