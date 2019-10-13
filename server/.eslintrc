@@ -8,17 +8,12 @@
         "extensions": [".js", "jsx"]
       }
     ],
-    "prettier/prettier": "error",
-    "max-len": ["error", 80]
+    "prettier/prettier": ["error", { "singleQuote": true, "parser": "flow" }],
+    "max-len": ["error", 80],
+    "quotes": [2, "single", { "avoidEscape": true }],
+    "trailing-comma": [1, { "multiline": "always", "singleline": "never" }]
   },
   "env": {
     "browser": true
-  },
-  "settings": {
-    "import/resolver": {
-      "webpack": {
-        "config": "./config/webpack-common-config.js"
-      }
-    }
   }
 }
