@@ -1,27 +1,29 @@
-import React from "react";
-import { Input, Badge, Icon, Row, Col } from "antd";
+import React from 'react';
+import { Input, Badge, Icon, Row, Col } from 'antd';
 
 const { Search } = Input;
 
-const ShoppingBar = () => {
+const ShoppingBar = ({ quantity, searchValue }) => {
   return (
-    <Row justify="center" align="middle">
-      <Col span={4} className="logo-container">
-        Logo
-      </Col>
-      <Col span={16} className="searchBar-container">
-        <Search
-          placeholder="input search text"
-          onSearch={value => console.log(value)}
-          enterButton
-        />
-      </Col>
-      <Col span={4} className="shopCart">
-        <Badge count={5}>
-          <Icon type="shopping-cart" className="head-example" />
-        </Badge>
-      </Col>
-    </Row>
+    <nav style={{ padding: '20px 0' }}>
+      <Row type="flex" justify="space-around" align="middle">
+        <Col span={4} className="txtalgn-center">
+          Logo
+        </Col>
+        <Col span={16} className="searchBar-container txtalgn-center">
+          <Search
+            placeholder="input search text"
+            onSearch={value => searchValue(value)}
+            enterButton
+          />
+        </Col>
+        <Col span={4} className="shopCart txtalgn-center">
+          <Badge count={quantity}>
+            <Icon type="shopping-cart" style={{ fontSize: '3em' }} />
+          </Badge>
+        </Col>
+      </Row>
+    </nav>
   );
 };
 export default ShoppingBar;

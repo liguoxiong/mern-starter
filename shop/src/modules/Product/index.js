@@ -1,9 +1,9 @@
-import React, { useEffect, Fragment } from "react";
-import ProductItem from "./../../components/ProductItem";
-import { useDispatch, useSelector } from "react-redux";
-import { GET_PRODUCT } from "./../../constants/actionTypes";
+import React, { useEffect, Fragment } from 'react';
+import ProductItem from './../../components/ProductItem';
+import { useDispatch, useSelector } from 'react-redux';
+import { GET_PRODUCT } from './../../constants/actionTypes';
 
-import ShoppingBar from "./../../components/ShoppingBar";
+import ShoppingBar from './../../components/ShoppingBar';
 
 const Product = () => {
   const dispatch = useDispatch();
@@ -17,14 +17,12 @@ const Product = () => {
   }, []);
   return (
     <Fragment>
-      <ShoppingBar />
+      <ShoppingBar quantity={3} searchValue={value => console.log(value)} />
       {!isLoading &&
         (isError ? (
           <div>Something went wrong...</div>
         ) : (
-          productList.map(item => (
-            <ProductItem key={item._id} product={item} grid={true} />
-          ))
+          productList.map(item => <ProductItem key={item._id} product={item} grid={true} />)
         ))}
     </Fragment>
   );
